@@ -20,5 +20,5 @@ env.bak/
 venv.bak/
 
 # Raw_data folders
-data/
+# data/
 test_data/
