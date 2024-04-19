@@ -22,3 +22,4 @@ venv.bak/
 # Raw_data folders
 # data/
 test_data/
+results/
