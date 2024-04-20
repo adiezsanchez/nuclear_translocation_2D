@@ -19,7 +19,8 @@ ENV/
 env.bak/
 venv.bak/
 
-# Raw_data folders
-# data/
+# Raw_data folders and sample identifiers
+data/
 test_data/
 results/
+mouse_ids.csv
