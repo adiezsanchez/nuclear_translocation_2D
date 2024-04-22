@@ -172,10 +172,30 @@ def classify_cells_percentage(
 ):
 
     # TODO: Write classification function based on percentage
+    h2a_quantile = 1.0 - (h2a_top_percentage / 100)
+    cfos_quantile = 1.0 - (cfos_top_percentage / 100)
 
-    # Filtering the DataFrames for values above the set threshold
-    h2a_filtered_df = merged_df[merged_df["h2a_intensity_mean"] > h2a_threshold]
-    cfos_filtered_df = merged_df[merged_df["cfos_intensity_mean"] > cfos_threshold]
+    # Calculate the desired percentiles
+    h2a_percentile = merged_df["h2a_intensity_mean"].quantile(h2a_quantile)
+    cfos_percentile = merged_df["cfos_intensity_mean"].quantile(cfos_quantile)
+
+    # Calculate the mean intensity value per channel
+    h2a_mean_intensity = merged_df["h2a_intensity_mean"].mean()
+    cfos_mean_intensity = merged_df["cfos_intensity_mean"].mean()
+
+    # Multiply the average intensity by the multiplier ratio to filter out values to close to the mean
+    h2a_ratio_filter = h2a_mean_intensity * h2a_ratio
+    cfos_ratio_filter = cfos_mean_intensity * cfos_ratio
+
+    # Filtering the DataFrames for values above the set percentile and ratio
+    h2a_filtered_df = merged_df[
+        (merged_df["h2a_intensity_mean"] > h2a_percentile)
+        & (merged_df["h2a_intensity_mean"] > h2a_ratio_filter)
+    ]
+    cfos_filtered_df = merged_df[
+        (merged_df["cfos_intensity_mean"] > cfos_percentile)
+        & (merged_df["cfos_intensity_mean"] > cfos_ratio_filter)
+    ]
 
     # Extracting the h2a and cfos label values as a list
     h2a_pos_labels = h2a_filtered_df["label"].tolist()
