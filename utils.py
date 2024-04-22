@@ -115,8 +115,64 @@ def extract_intensities(
     return merged_df
 
 
-def classify_cells(merged_df, nuclei_masks, h2a_threshold, cfos_threshold):
+def classify_cells_threshold(merged_df, nuclei_masks, h2a_threshold, cfos_threshold):
     """Select H2A and CFOS positive cells based on mean_intensity thresholds, return a mask of + cells"""
+    # Filtering the DataFrames for values above the set threshold
+    h2a_filtered_df = merged_df[merged_df["h2a_intensity_mean"] > h2a_threshold]
+    cfos_filtered_df = merged_df[merged_df["cfos_intensity_mean"] > cfos_threshold]
+
+    # Extracting the h2a and cfos label values as a list
+    h2a_pos_labels = h2a_filtered_df["label"].tolist()
+    cfos_pos_labels = cfos_filtered_df["label"].tolist()
+
+    # Convert lists to NumPy arrays to leverage vectorized comparisons
+    h2a_pos_labels_array = np.array(h2a_pos_labels)
+    cfos_pos_labels_array = np.array(cfos_pos_labels)
+
+    # Find common labels
+    double_pos_labels = np.intersect1d(h2a_pos_labels_array, cfos_pos_labels_array)
+
+    # Create copies of the original nuclei_masks array
+    h2a_nuclei_labels = nuclei_masks.copy()
+    cfos_nuclei_labels = nuclei_masks.copy()
+    double_pos_nuclei_labels = nuclei_masks.copy()
+
+    nuclei_labels_arrays = [
+        h2a_nuclei_labels,
+        cfos_nuclei_labels,
+        double_pos_nuclei_labels,
+    ]
+    labels_to_keep = [h2a_pos_labels, cfos_pos_labels, double_pos_labels]
+
+    for array, labels in zip(nuclei_labels_arrays, labels_to_keep):
+
+        # Check if elements are in the 'values_to_keep' array
+        in_values = np.isin(array, labels)
+
+        # Set elements not in 'values_to_keep' to zero
+        array[~in_values] = 0
+
+    return (
+        h2a_nuclei_labels,
+        cfos_nuclei_labels,
+        double_pos_nuclei_labels,
+        h2a_pos_labels,
+        cfos_pos_labels,
+        double_pos_labels,
+    )
+
+
+def classify_cells_percentage(
+    merged_df,
+    nuclei_masks,
+    h2a_top_percentage,
+    cfos_top_percentage,
+    h2a_ratio,
+    cfos_ratio,
+):
+
+    # TODO: Write classification function based on percentage
+
     # Filtering the DataFrames for values above the set threshold
     h2a_filtered_df = merged_df[merged_df["h2a_intensity_mean"] > h2a_threshold]
     cfos_filtered_df = merged_df[merged_df["cfos_intensity_mean"] > cfos_threshold]
