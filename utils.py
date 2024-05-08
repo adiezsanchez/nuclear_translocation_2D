@@ -208,6 +208,17 @@ def classify_cells_percentage(
     # Find common labels
     double_pos_labels = np.intersect1d(h2a_pos_labels_array, cfos_pos_labels_array)
 
+    # Return a Dataframe where marker + labels are classified as True in a new column
+    # Convert arrays to a set for faster membership checking
+    h2a_pos_labels_set = set(h2a_pos_labels_array)
+    cfos_pos_labels_set = set(cfos_pos_labels_array)
+    double_pos_labels_set = set(double_pos_labels)
+
+    # Create a new column based on membership in the set
+    merged_df['h2a_pos_cells'] = merged_df['label'].isin(h2a_pos_labels_set)
+    merged_df['cfos_pos_cells'] = merged_df['label'].isin(cfos_pos_labels_set)
+    merged_df['double_pos_cells'] = merged_df['label'].isin(double_pos_labels_set)
+
     # Create copies of the original nuclei_masks array
     h2a_nuclei_labels = nuclei_masks.copy()
     cfos_nuclei_labels = nuclei_masks.copy()
@@ -229,6 +240,7 @@ def classify_cells_percentage(
         array[~in_values] = 0
 
     return (
+        merged_df,
         h2a_nuclei_labels,
         cfos_nuclei_labels,
         double_pos_nuclei_labels,
